@@ -1400,7 +1400,8 @@ function getAirlineById(id) {
 }
 
 function getAirportByCode(code) {
-  return airports.find(airline => airline.code === code);
+  console.log(airports);
+  return airports.find(airport => airport.code === code);
 }
 
 export default {routes, airlines, airports, getAirportByCode, getAirlineById};

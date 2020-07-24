@@ -3,6 +3,7 @@ import './App.css';
 import Data from './data.js';
 import Table from './components/Table.jsx';
 import Select from './components/Select.jsx';
+import FlightMap from './components/FlightMap.jsx';
 
 const {routes, airlines, airports, getAirportByCode, getAirlineById} = Data;
 
@@ -64,17 +65,24 @@ class App extends Component {
       return this.routeHasAirline(route) && this.routeHasAirport(route);
     });
 
-    const filteredRoutesByAirline = routes.filter(this.routeHasAirline);
+    const filteredRoutesByAirline = routes.filter(this.routeHasAirline);  
     const filteredRoutesByAirport = routes.filter(this.routeHasAirport);
 
-    const filteredAirlines = airlines.filter(airline => {
-      return filteredRoutesByAirport.some(route => route.airline === airline.id);
+    const disabledFilteredAirlines = airlines.map(airline => {
+      const disabled = filteredRoutesByAirport.every(route => route.airline !== airline.id);
+      return Object.assign({}, airline, { disabled });
     });
 
-    const filteredAirports = airports.filter(airport => {
-      return filteredRoutesByAirline.some(route => {
-        return route.src === airport.code || route.dest === airport.code;
+    const filteredAirports = [];
+
+    const disabledFilteredAirports = airports.map(airport => {
+      const disabled = filteredRoutesByAirline.every(route => {
+        return route.src !== airport.code && route.dest !== airport.code;
       });
+
+      if (!disabled) filteredAirports.push(airport);
+
+      return Object.assign({}, airport, { disabled });
     });
 
     return (
@@ -83,9 +91,13 @@ class App extends Component {
           <h1 className="title">Airline Routes</h1>
         </header>
         <section>
+          <FlightMap
+            routes={filteredRoutes}
+            airports={filteredAirports}
+          />
           <p>Show routes on
             <Select
-              options={filteredAirlines}
+              options={disabledFilteredAirlines}
               valueKey="id"
               titleKey="name"
               allTitle="All Airlines"
@@ -111,7 +123,6 @@ class App extends Component {
             columns={columns}
             rows={filteredRoutes}
             format={this.formatValue}
-            perPage={this.state.perPage}
           />
         </section>
       </div>

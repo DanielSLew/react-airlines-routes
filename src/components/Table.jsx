@@ -25,12 +25,16 @@ class Table extends React.Component {
   }
 
   render() {
-    const firstRoute = this.state.page * this.props.perPage;
-    const upperLimit = firstRoute + this.props.perPage - 1;
-    const lastRoute = this.props.rows.length < upperLimit ? this.props.rows.length : upperLimit;
+    const bottomOfPageRange = this.state.page * this.props.perPage + 1;
+    const maxTopRange = bottomOfPageRange + this.props.perPage - 1;
+    const topOfPageRange = this.props.rows.length <= maxTopRange ? this.props.rows.length : maxTopRange;
 
-    const routesDisplayed = this.props.rows.slice(firstRoute, lastRoute + 1);
+    const routesDisplayed = this.props.rows.slice(bottomOfPageRange - 1, topOfPageRange);
     
+    const displayCurrentRoutesMessage = `
+      Showing ${routesDisplayed.length === 0 ? 0 : bottomOfPageRange} - 
+      ${topOfPageRange} routes of ${this.props.rows.length} routes`;
+  
     return (
       <div>
         <table className={this.props.className}>
@@ -52,12 +56,12 @@ class Table extends React.Component {
           </tbody>
         </table>
         <div className="pagination">
-         <p>Showing {lastRoute === 0 ? 0 : firstRoute + 1} - {lastRoute + 1} routes of {this.props.rows.length} routes</p>
+         <p>{displayCurrentRoutesMessage}</p>
          <p>
             <button disabled={this.state.page === 0} onClick={() => this.handlePreviousPage()}>
               Previous Page
             </button>
-            <button disabled={lastRoute + 1 >= this.props.rows.length} onClick={() => this.handleNextPage()}>
+            <button disabled={topOfPageRange + 1 >= this.props.rows.length} onClick={() => this.handleNextPage()}>
               Next Page
             </button>
           </p>
